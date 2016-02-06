@@ -7,9 +7,9 @@ use select::node::Node;
 
 struct Article {
     title: String,
-    // link: String,
-    // details: String,
-    // summary: String,
+    link: String,
+    details: String,
+    summary: String,
 }
 
 impl Article {
@@ -22,7 +22,19 @@ impl Article {
     
     fn new(node: &Node) -> Article {
         let header = node.find(Name("a")).first().unwrap();
-        Article{ title: header.text() }
+        let mut link = String::from(header.attr("href").unwrap());
+        if link.starts_with("/") { assert_eq!(link.remove(0), '/'); }
+        let mut details = node.find(Class("details")).first().unwrap().text();
+        if details.contains("Add a comment") {
+            details = details.replace("Add a Comment", "0 comments");
+        }
+        let summary = node.find(Name("p")).first().unwrap().text();
+        Article{
+            title: header.text(),
+            link: link,
+            details: details,
+            summary: summary,
+        }
     }
 }
 
@@ -33,6 +45,9 @@ fn open_testing() -> &'static str {
 fn main() {
     let phoronix_articles = Article::get_articles();
     for article in phoronix_articles {
-        println!("{}", article.title);
+        println!("Title:   {}", article.title);
+        println!("Link:    https://www.phoronix.com/{}", article.link);
+        println!("Details: {}", article.details);
+        println!("Summary: {}\n", article.summary);
     }
 }
