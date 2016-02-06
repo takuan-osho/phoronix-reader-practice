@@ -1,50 +1,25 @@
+use std::io::Read;
+
 extern crate hyper;
+use hyper::Client;
+use hyper::header::Connection;
+
 extern crate select;
+mod article;
+use article::Article;
 
-use select::document::Document;
-use select::predicate::{Class, Name};
-use select::node::Node;
-
-struct Article {
-    title: String,
-    link: String,
-    details: String,
-    summary: String,
-}
-
-impl Article {
-    fn get_articles() -> Vec<Article> {
-        Document::from_str(open_testing())
-            .find(Name("article")).iter()
-            .map(|node| Article::new(&node))
-            .collect()
-    }
-    
-    fn new(node: &Node) -> Article {
-        let header = node.find(Name("a")).first().unwrap();
-        let mut link = String::from(header.attr("href").unwrap());
-        if link.starts_with("/") { assert_eq!(link.remove(0), '/'); }
-        let mut details = node.find(Class("details")).first().unwrap().text();
-        if details.contains("Add a comment") {
-            details = details.replace("Add a Comment", "0 comments");
-        }
-        let summary = node.find(Name("p")).first().unwrap().text();
-        Article{
-            title: header.text(),
-            link: link,
-            details: details,
-            summary: summary,
-        }
-    }
-}
-
-fn open_testing() -> &'static str {
-    include_str!("phoronix.html")
+fn open_phoronix() -> String {
+    let client = Client::new();
+    let mut response = client.get("https://www.phoronix.com/")
+        .header(Connection::close()).send().unwrap();
+    let mut body = String::new();
+    response.read_to_string(&mut body).unwrap();
+    return body;
 }
 
 fn main() {
-    let phoronix_articles = Article::get_articles();
-    for article in phoronix_articles {
+    let phoronix_articles = Article::get_articles(&open_phoronix());
+    for article in phoronix_articles.iter().rev() {
         println!("Title:   {}", article.title);
         println!("Link:    https://www.phoronix.com/{}", article.link);
         println!("Details: {}", article.details);
