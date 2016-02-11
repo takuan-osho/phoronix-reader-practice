@@ -1,5 +1,6 @@
 use article::Article;
 use homepage;
+use linesplit;
 
 pub fn print() {
     let phoronix_articles = Article::get_articles(homepage::offline());
@@ -7,6 +8,10 @@ pub fn print() {
         println!("Title:   {}", article.title);
         println!("Link:    https://www.phoronix.com/{}", article.link);
         println!("Details: {}", article.details);
-        println!("Summary: {}\n", article.summary);
+        println!("Summary:");
+        for line in linesplit::split_by_chars(&article.summary, 77) {
+            println!(" - {}", line);
+        }
+        print!("\n");
     }
 }
