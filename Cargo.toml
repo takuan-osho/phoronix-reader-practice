@@ -6,3 +6,4 @@ authors = ["SHIMIZU Taku <shimizu.taku@gmail.com>"]
 [dependencies]
 hyper = "*"
 select = "*"
+term = "*"
