@@ -3,6 +3,18 @@ use homepage;
 use linesplit;
 use term;
 
+pub fn print() {
+    let phoronix_articles = Article::get_articles(&homepage::online());
+    for article in phoronix_articles.iter().rev() {
+        println!("Title:   {}", article.title);
+        println!("Link:    https://www.phoronix.com/{}", article.link);
+        println!("Details: {}", article.details);
+        println!("Summary:");
+        for line in linesplit::split_by_chars(&article.summary, 77) { println!(" - {}", line); }
+        print!("\n");
+    }
+}
+
 pub fn print_colored() {
     let phoronix_articles = Article::get_articles(homepage::offline());
     let mut terminal = term::stdout().unwrap();
